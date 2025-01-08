@@ -18,5 +18,4 @@ class EntityManager
     private:
         std::vector<std::shared_ptr<Entity>> m_entities;
         size_t m_idCounter = 0;
-
 };

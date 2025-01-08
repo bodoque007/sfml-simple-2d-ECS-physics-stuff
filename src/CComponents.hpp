@@ -6,10 +6,10 @@ class CTransform
     public:
         sf::Vector2f position = {0.0, 0.0};
         sf::Vector2f velocity = {0.0, 0.0};
-        float angle = 0.0;
+        sf::Angle angle = sf::degrees(0.0f);
 
-        CTransform(const sf::Vector2f& pos, const sf::Vector2f& vel, float a) : 
-            position(pos), velocity(vel), angle(a) {}
+        CTransform(const sf::Vector2f& pos, const sf::Vector2f& vel) : 
+            position(pos), velocity(vel) {}
 };
 
 class CShape 

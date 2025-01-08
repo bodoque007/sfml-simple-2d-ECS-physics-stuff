@@ -1,8 +1,7 @@
-
 #include "Game.hpp"
 #include <iostream>
 
-Game::Game() : m_window(sf::VideoMode({800, 600}), "ECS Asteroids")
+Game::Game() : m_window(sf::VideoMode({1000, 800}), "ECS Asteroids")
 {
     m_window.setFramerateLimit(60);
     m_window.setVerticalSyncEnabled(true);
@@ -24,6 +23,11 @@ void Game::run()
     {
         sf::Time dt = m_clock.restart();
         m_elapsed += dt;
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::P))
+        {
+            m_running = !m_running;
+        }
 
         while (const std::optional event = m_window.pollEvent())
         {
@@ -51,7 +55,7 @@ void Game::spawnPlayer()
 {
     auto player = std::make_shared<Entity>(0, "player");
 
-    player->transform = std::make_shared<CTransform>(sf::Vector2f(200.0f, 200.0f), sf::Vector2f(1.0f, 1.0f), 0.0f);
+    player->transform = std::make_shared<CTransform>(sf::Vector2f(200.0f, 200.0f), sf::Vector2f(1.0f, 1.0f));
     player->shape = std::make_shared<CShape>(10.0f, 3, sf::Color::Green, sf::Color::White, 1.0f);
     player->collision = std::make_shared<CCollision>(10.0f);
     player->input = std::make_shared<CInput>();
@@ -62,6 +66,8 @@ void Game::spawnPlayer()
 void Game::sRender()
 {
     m_window.clear();
+    m_player->transform->angle += sf::degrees(1.0f);
+    m_player->shape->circle.setRotation(m_player->transform->angle);
 
     m_player->shape->circle.setPosition(m_player->transform->position);
     m_window.draw(m_player->shape->circle);
@@ -71,6 +77,19 @@ void Game::sRender()
 
 void Game::sMovement()
 {
+    m_player->transform->velocity = {0, 0};
+    if (m_player->input->up) {
+        m_player->transform->velocity.y -= 5;
+    }
+    if (m_player->input->down) {
+        m_player->transform->velocity.y += 5;
+    }
+    if (m_player->input->left) {
+        m_player->transform->velocity.x -= 5;
+    }
+    if (m_player->input->right) {
+        m_player->transform->velocity.x += 5;
+    }
     m_player->transform->position += m_player->transform->velocity;
 
 }
