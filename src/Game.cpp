@@ -1,5 +1,7 @@
 #include "Game.hpp"
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 Game::Game() : m_window(sf::VideoMode({1000, 800}), "ECS Asteroids")
 {
@@ -39,13 +41,13 @@ void Game::run()
         }
         if (m_running) 
         {
+            sUserInput();
             if (m_elapsed.asMilliseconds() - m_lastEnemySpawn > 1000)
             {
                 spawnEnemy();
                 m_lastEnemySpawn = m_elapsed.asMilliseconds();
             }
             sMovement();
-            sUserInput();
         }
         sRender();
     }
@@ -100,7 +102,11 @@ void Game::sMovement()
     if (m_player->input->right) {
         m_player->transform->velocity.x += 5;
     }
-    m_player->transform->position += m_player->transform->velocity;
+
+    for (auto& entity : m_entityManager->getEntities())
+    {
+        entity->transform->position += entity->transform->velocity;
+    }
 
 }
 
@@ -130,4 +136,21 @@ void Game::sUserInput()
         m_player->input->shoot = true;
     else
         m_player->input->shoot = false;
+}
+
+void Game::spawnEnemy()
+{
+    auto enemy = m_entityManager->addEntity("enemy");
+
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    float randomX = static_cast<float>(std::rand() % m_window.getSize().x);
+    float randomY = static_cast<float>(std::rand() % m_window.getSize().y);
+    sf::Vector2f randomPosition(randomX, randomY);
+
+    int randomPolygons = 3 + (std::rand() % 10);
+
+    enemy->transform = std::make_shared<CTransform>(randomPosition, sf::Vector2f(1.0f, 1.0f));
+    enemy->shape = std::make_shared<CShape>(10.0f, randomPolygons, sf::Color::Red, sf::Color::White, 1.0f);
+
 }
