@@ -1,6 +1,7 @@
 #include "SFML/Graphics.hpp"
 #include <memory>
 #include "Entity.hpp"
+#include "EntityManager.hpp"
 
 class Game
 {
@@ -12,6 +13,8 @@ class Game
         int m_score = 0;
         int m_lastEnemySpawn = 0;
         std::shared_ptr<Entity> m_player;
+        std::shared_ptr<EntityManager> m_entityManager;
+
 
         void init();
         void setPause(bool pause);

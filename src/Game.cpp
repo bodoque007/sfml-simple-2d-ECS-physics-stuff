@@ -5,7 +5,8 @@ Game::Game() : m_window(sf::VideoMode({1000, 800}), "ECS Asteroids")
 {
     m_window.setFramerateLimit(60);
     m_window.setVerticalSyncEnabled(true);
-};
+    m_entityManager = std::make_shared<EntityManager>();
+}
 
 void Game::init()
 {
@@ -38,10 +39,14 @@ void Game::run()
         }
         if (m_running) 
         {
+            if (m_elapsed.asMilliseconds() - m_lastEnemySpawn > 1000)
+            {
+                spawnEnemy();
+                m_lastEnemySpawn = m_elapsed.asMilliseconds();
+            }
             sMovement();
             sUserInput();
         }
-
         sRender();
     }
 }
@@ -53,7 +58,7 @@ void Game::setPause(bool pause)
 
 void Game::spawnPlayer()
 {
-    auto player = std::make_shared<Entity>(0, "player");
+    auto player = m_entityManager->addEntity("player");
 
     player->transform = std::make_shared<CTransform>(sf::Vector2f(200.0f, 200.0f), sf::Vector2f(1.0f, 1.0f));
     player->shape = std::make_shared<CShape>(10.0f, 3, sf::Color::Green, sf::Color::White, 1.0f);
@@ -66,11 +71,16 @@ void Game::spawnPlayer()
 void Game::sRender()
 {
     m_window.clear();
-    m_player->transform->angle += sf::degrees(1.0f);
-    m_player->shape->circle.setRotation(m_player->transform->angle);
+    m_entityManager->update();
 
-    m_player->shape->circle.setPosition(m_player->transform->position);
-    m_window.draw(m_player->shape->circle);
+    for (auto& entity : m_entityManager->getEntities())
+    {
+        entity->transform->angle += sf::degrees(1.0f);
+        entity->shape->circle.setRotation(entity->transform->angle);
+
+        entity->shape->circle.setPosition(entity->transform->position);
+        m_window.draw(entity->shape->circle);
+    }
 
     m_window.display();
 }
