@@ -2,7 +2,7 @@
 #include "Game.hpp"
 #include <iostream>
 
-Game::Game() : m_window(sf::VideoMode({800, 600}), "ECS Asteroids"), m_entities(EntityManager())
+Game::Game() : m_window(sf::VideoMode({800, 600}), "ECS Asteroids")
 {
     m_window.setFramerateLimit(60);
     m_window.setVerticalSyncEnabled(true);
@@ -10,7 +10,6 @@ Game::Game() : m_window(sf::VideoMode({800, 600}), "ECS Asteroids"), m_entities(
 
 void Game::init()
 {
-    m_entities.clear();
     m_score = 0;
     m_lastEnemySpawn = 0;
     m_running = true;
@@ -39,7 +38,6 @@ void Game::run()
             sUserInput();
         }
 
-        m_entities.update(dt);
         sRender();
     }
 }
@@ -51,7 +49,7 @@ void Game::setPause(bool pause)
 
 void Game::spawnPlayer()
 {
-    auto player = m_entities.addEntity("player");
+    auto player = std::make_shared<Entity>(0, "player");
 
     player->transform = std::make_shared<CTransform>(sf::Vector2f(200.0f, 200.0f), sf::Vector2f(1.0f, 1.0f), 0.0f);
     player->shape = std::make_shared<CShape>(10.0f, 3, sf::Color::Green, sf::Color::White, 1.0f);

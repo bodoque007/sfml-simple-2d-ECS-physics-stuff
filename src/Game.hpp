@@ -1,7 +1,6 @@
 #include "SFML/Graphics.hpp"
 #include <memory>
 #include "Entity.hpp"
-#include "EntityManager.hpp"
 
 class Game
 {
@@ -9,7 +8,6 @@ class Game
         sf::RenderWindow m_window;
         sf::Clock m_clock;
         sf::Time m_elapsed;
-        EntityManager m_entities;
         bool m_running = false;
         int m_score = 0;
         int m_lastEnemySpawn = 0;
