@@ -14,6 +14,7 @@ class Game
         int m_lastEnemySpawn = 0;
         std::shared_ptr<Entity> m_player;
         std::shared_ptr<EntityManager> m_entityManager;
+        bool isShooting = false;
 
 
         void init();
@@ -28,7 +29,7 @@ class Game
 
         void spawnPlayer();
         void spawnEnemy();
-        void spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2f& mousePos);
+        void spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos);
 
     public:
         Game();

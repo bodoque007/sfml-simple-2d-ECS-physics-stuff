@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 Game::Game() : m_window(sf::VideoMode({1000, 800}), "ECS Asteroids")
 {
@@ -15,6 +16,7 @@ void Game::init()
     m_score = 0;
     m_lastEnemySpawn = 0;
     m_running = true;
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
     spawnPlayer();
 }
 
@@ -39,7 +41,7 @@ void Game::run()
                 m_window.close();
             }
         }
-        if (m_running) 
+        if (m_running)
         {
             sUserInput();
             if (m_elapsed.asMilliseconds() - m_lastEnemySpawn > 1000)
@@ -102,6 +104,7 @@ void Game::sMovement()
     if (m_player->input->right) {
         m_player->transform->velocity.x += 5;
     }
+    
 
     for (auto& entity : m_entityManager->getEntities())
     {
@@ -131,26 +134,56 @@ void Game::sUserInput()
         m_player->input->right = true;
     else
         m_player->input->right = false;
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
         m_player->input->shoot = true;
     else
         m_player->input->shoot = false;
+
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+      if (!isShooting) {
+        spawnBullet(m_player, sf::Mouse::getPosition(m_window));
+        isShooting = true;
+      }
+    } else {
+      isShooting = false;
+    }
 }
 
 void Game::spawnEnemy()
 {
     auto enemy = m_entityManager->addEntity("enemy");
 
-    std::srand(static_cast<unsigned>(std::time(nullptr)));
-
     float randomX = static_cast<float>(std::rand() % m_window.getSize().x);
     float randomY = static_cast<float>(std::rand() % m_window.getSize().y);
     sf::Vector2f randomPosition(randomX, randomY);
 
+    float randomX_velocity = static_cast<float>(std::rand() % 3);
+    float randomY_velocity = static_cast<float>(std::rand() % 3);
+    int randomSign = (std::rand() % 2) * 2 - 1;
+    
+    sf::Vector2f randomVelocity(randomX_velocity * randomSign, randomY_velocity * randomSign);
+
     int randomPolygons = 3 + (std::rand() % 10);
 
-    enemy->transform = std::make_shared<CTransform>(randomPosition, sf::Vector2f(1.0f, 1.0f));
+    enemy->transform = std::make_shared<CTransform>(randomPosition, randomVelocity + sf::Vector2f(1.0f * randomSign, 1.0f * randomSign));
     enemy->shape = std::make_shared<CShape>(10.0f, randomPolygons, sf::Color::Red, sf::Color::White, 1.0f);
+}
 
+
+void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos)
+{
+    auto bullet = m_entityManager->addEntity("bullet");
+    sf::Vector2f playerPosition = entity->transform->position;
+
+    sf::Vector2f direction = {
+      static_cast < float > (mousePos.x) - playerPosition.x,
+      static_cast < float > (mousePos.y) - playerPosition.y
+    };
+    
+    float length = std::sqrt(direction.x*direction.x + direction.y*direction.y);
+
+    sf::Vector2f directionNormalized = { direction.x / length, direction.y / length };
+
+    bullet->shape = std::make_shared<CShape>(5.0f, 3, sf::Color::Blue, sf::Color::White, 1.0f);
+    bullet->transform = std::make_shared<CTransform>(playerPosition, sf::Vector2f(directionNormalized.x * 5, directionNormalized.y * 5));
 }
