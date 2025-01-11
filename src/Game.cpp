@@ -109,6 +109,13 @@ void Game::sMovement()
     for (auto& entity : m_entityManager->getEntities())
     {
         entity->transform->position += entity->transform->velocity;
+        if (entity->transform->position.x > m_window.getSize().x 
+        || entity->transform->position.x < 0
+        || entity->transform->position.y > m_window.getSize().y
+        || entity->transform->position.y < 0)
+        {
+            entity->destroy();
+        }
     }
 
 }

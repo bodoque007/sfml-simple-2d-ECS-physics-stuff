@@ -19,5 +19,4 @@ class EntityManager
         std::vector<std::shared_ptr<Entity>> m_entities = {};
         size_t m_idCounter = 0;
         std::vector<std::shared_ptr<Entity>> m_entities_to_add = {};
-        std::vector<size_t> m_entities_to_destroy = {};
 };

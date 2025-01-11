@@ -21,8 +21,8 @@ class Entity
         std::shared_ptr<CScore> score;
         std::shared_ptr<CLifespan> lifespan;
 
-        bool isActive() const;
         const size_t getId() const;
         const std::string& getTag() const;
         void destroy();
+        bool isActive();
 };

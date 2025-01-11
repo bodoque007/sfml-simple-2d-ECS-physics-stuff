@@ -1,5 +1,6 @@
 #include "EntityManager.hpp"
-
+#include <algorithm>
+#include <iostream>
 
 EntityManager::EntityManager()
 {
@@ -24,12 +25,19 @@ std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag)
 
 void EntityManager::update()
 {
+    m_entities.erase(
+        std::remove_if(m_entities.begin(), m_entities.end(),
+            [](const auto& entity) { return !entity->isActive(); }
+        ),
+        m_entities.end()
+    );
+
     for (auto& entity : m_entities_to_add)
     {
         m_entities.push_back(entity);
     }
+
     m_entities_to_add.clear();
-    m_entities_to_destroy.clear();
 }
 
 std::vector<std::shared_ptr<Entity>> EntityManager::getEntities()
