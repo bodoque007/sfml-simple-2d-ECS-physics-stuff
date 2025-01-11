@@ -32,9 +32,21 @@ void EntityManager::update()
         m_entities.end()
     );
 
+    for (auto& [tag, entities] : m_entities_by_tag) {
+        entities.erase(
+            std::remove_if(entities.begin(), entities.end(),
+                [](const auto& entity) { 
+                    return !entity || !entity->isActive(); 
+                }
+            ),
+            entities.end()
+        );
+    }
+
     for (auto& entity : m_entities_to_add)
     {
         m_entities.push_back(entity);
+        m_entities_by_tag[entity->getTag()].push_back(entity);
     }
 
     m_entities_to_add.clear();
@@ -43,4 +55,10 @@ void EntityManager::update()
 std::vector<std::shared_ptr<Entity>> EntityManager::getEntities()
 {
     return m_entities;
+}
+
+
+std::vector<std::shared_ptr<Entity>> EntityManager::getEntitiesByTag(const std::string& tag)
+{
+    return m_entities_by_tag[tag];
 }

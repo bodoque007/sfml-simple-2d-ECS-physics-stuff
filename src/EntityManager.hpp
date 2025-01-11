@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
-
+#include <map>
 #include "Entity.hpp"
 
 class EntityManager
@@ -19,4 +19,6 @@ class EntityManager
         std::vector<std::shared_ptr<Entity>> m_entities = {};
         size_t m_idCounter = 0;
         std::vector<std::shared_ptr<Entity>> m_entities_to_add = {};
+        // Map of entities by tag
+        std::map<std::string, std::vector<std::shared_ptr<Entity>>> m_entities_by_tag = {};
 };

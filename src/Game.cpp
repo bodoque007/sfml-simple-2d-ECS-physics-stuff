@@ -44,12 +44,14 @@ void Game::run()
         if (m_running)
         {
             sUserInput();
+            sCollision();
             if (m_elapsed.asMilliseconds() - m_lastEnemySpawn > 1000)
             {
                 spawnEnemy();
                 m_lastEnemySpawn = m_elapsed.asMilliseconds();
             }
             sMovement();
+
         }
         sRender();
     }
@@ -174,8 +176,10 @@ void Game::spawnEnemy()
 
     enemy->transform = std::make_shared<CTransform>(randomPosition, randomVelocity + sf::Vector2f(1.0f * randomSign, 1.0f * randomSign));
     enemy->shape = std::make_shared<CShape>(10.0f, randomPolygons, sf::Color::Red, sf::Color::White, 1.0f);
-}
+    enemy->collision = std::make_shared<CCollision>(10.0f);
 
+    enemy->shape->circle.setOrigin({enemy->shape->circle.getRadius(), enemy->shape->circle.getRadius()});
+}
 
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mousePos)
 {
@@ -192,5 +196,23 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mouse
     sf::Vector2f directionNormalized = { direction.x / length, direction.y / length };
 
     bullet->shape = std::make_shared<CShape>(5.0f, 3, sf::Color::Blue, sf::Color::White, 1.0f);
+    bullet->collision = std::make_shared<CCollision>(5.0f);
+    bullet->shape->circle.setOrigin({bullet->shape->circle.getRadius(), bullet->shape->circle.getRadius()});
     bullet->transform = std::make_shared<CTransform>(playerPosition, sf::Vector2f(directionNormalized.x * 5, directionNormalized.y * 5));
+}
+
+void Game::sCollision()
+{
+    for (auto& bullet : m_entityManager->getEntitiesByTag("bullet"))
+    {
+        for (auto& enemy : m_entityManager->getEntitiesByTag("enemy"))
+        {
+            float distanceSquared = std::pow(bullet->shape->circle.getPosition().x - enemy->shape->circle.getPosition().x, 2) +
+                                    std::pow(bullet->shape->circle.getPosition().y - enemy->shape->circle.getPosition().y, 2);
+            if (distanceSquared < std::pow(bullet->collision->radius + enemy->collision->radius, 2)) {
+                bullet->destroy();
+                enemy->destroy();
+            }
+        }
+    }
 }
