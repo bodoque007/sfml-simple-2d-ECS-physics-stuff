@@ -51,7 +51,7 @@ void Game::run()
                 m_lastEnemySpawn = m_elapsed.asMilliseconds();
             }
             sMovement();
-
+            sLifeSpan(dt);
         }
         sRender();
     }
@@ -177,6 +177,7 @@ void Game::spawnEnemy()
     enemy->transform = std::make_shared<CTransform>(randomPosition, randomVelocity + sf::Vector2f(1.0f * randomSign, 1.0f * randomSign));
     enemy->shape = std::make_shared<CShape>(10.0f, randomPolygons, sf::Color::Red, sf::Color::White, 1.0f);
     enemy->collision = std::make_shared<CCollision>(10.0f);
+    enemy->lifespan = std::make_shared<CLifespan>(2.f);
 
     enemy->shape->circle.setOrigin({enemy->shape->circle.getRadius(), enemy->shape->circle.getRadius()});
 }
@@ -207,12 +208,32 @@ void Game::sCollision()
     {
         for (auto& enemy : m_entityManager->getEntitiesByTag("enemy"))
         {
+            if (!enemy->collision) continue;
             float distanceSquared = std::pow(bullet->shape->circle.getPosition().x - enemy->shape->circle.getPosition().x, 2) +
                                     std::pow(bullet->shape->circle.getPosition().y - enemy->shape->circle.getPosition().y, 2);
             if (distanceSquared < std::pow(bullet->collision->radius + enemy->collision->radius, 2)) {
                 bullet->destroy();
                 enemy->destroy();
+                float angle = 0;
+                for (int i = 0; i < enemy->shape->circle.getPointCount(); i++)
+                {
+                    angle += (360 / enemy->shape->circle.getPointCount());
+                    auto enemyPiece = m_entityManager->addEntity("enemy");
+                    sf::Vector2f velocity(std::cos(angle), std::sin(angle));
+                    enemyPiece->transform = std::make_shared<CTransform>(enemy->transform->position, velocity);
+                    enemyPiece->shape = std::make_shared<CShape>(3, enemy->shape->circle.getPointCount(), sf::Color::Blue, sf::Color::White, 1.0f);
+                }
             }
         }
+    }
+}
+
+void Game::sLifeSpan(const sf::Time& dt)
+{
+    for (auto& entity : m_entityManager->getEntitiesByTag("enemy"))
+    {
+        if (!entity->lifespan) continue;
+        entity->lifespan->remaining -= dt.asSeconds();
+        if (entity->lifespan->remaining <= 0) entity->destroy();
     }
 }

@@ -25,7 +25,7 @@ class Game
         void sCollision();
         void sRender();
         void sEnemySpawner();
-        void sLifeSpan();
+        void sLifeSpan(const sf::Time& dt);
 
         void spawnPlayer();
         void spawnEnemy();

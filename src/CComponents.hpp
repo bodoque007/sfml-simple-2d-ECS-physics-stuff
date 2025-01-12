@@ -44,8 +44,8 @@ class CScore
 class CLifespan 
 {
     public:
-        int remaining = 0;
-        CLifespan(int life) : remaining(life) {};
+        float remaining;
+        CLifespan(float life) : remaining(life) {};
 };
 
 class CInput 
