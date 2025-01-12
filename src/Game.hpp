@@ -20,7 +20,7 @@ class Game
         void init();
         void setPause(bool pause);
 
-        void sMovement();
+        void sMovement(const sf::Time& dt);
         void sUserInput();
         void sCollision();
         void sRender();

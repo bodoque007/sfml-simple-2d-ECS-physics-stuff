@@ -50,7 +50,7 @@ void Game::run()
                 spawnEnemy();
                 m_lastEnemySpawn = m_elapsed.asMilliseconds();
             }
-            sMovement();
+            sMovement(dt);
             sLifeSpan(dt);
         }
         sRender();
@@ -91,26 +91,27 @@ void Game::sRender()
     m_window.display();
 }
 
-void Game::sMovement()
+void Game::sMovement(const sf::Time& dt)
 {
+    float dt_seconds = dt.asSeconds();
     m_player->transform->velocity = {0, 0};
     if (m_player->input->up) {
-        m_player->transform->velocity.y -= 5;
+        m_player->transform->velocity.y -= 300.f;
     }
     if (m_player->input->down) {
-        m_player->transform->velocity.y += 5;
+        m_player->transform->velocity.y += 300.f;
     }
     if (m_player->input->left) {
-        m_player->transform->velocity.x -= 5;
+        m_player->transform->velocity.x -= 300.f;
     }
     if (m_player->input->right) {
-        m_player->transform->velocity.x += 5;
+        m_player->transform->velocity.x += 300.f;
     }
     
 
     for (auto& entity : m_entityManager->getEntities())
     {
-        entity->transform->position += entity->transform->velocity;
+        entity->transform->position += entity->transform->velocity * dt_seconds;
         if (entity->transform->position.x > m_window.getSize().x 
         || entity->transform->position.x < 0
         || entity->transform->position.y > m_window.getSize().y
@@ -174,7 +175,7 @@ void Game::spawnEnemy()
 
     int randomPolygons = 3 + (std::rand() % 10);
 
-    enemy->transform = std::make_shared<CTransform>(randomPosition, randomVelocity + sf::Vector2f(1.0f * randomSign, 1.0f * randomSign));
+    enemy->transform = std::make_shared<CTransform>(randomPosition, randomVelocity + sf::Vector2f(1.0f * randomSign, 1.0f * randomSign) * 300.f);
     enemy->shape = std::make_shared<CShape>(10.0f, randomPolygons, sf::Color::Red, sf::Color::White, 1.0f);
     enemy->collision = std::make_shared<CCollision>(10.0f);
     enemy->lifespan = std::make_shared<CLifespan>(2.f);
@@ -199,7 +200,7 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const sf::Vector2i& mouse
     bullet->shape = std::make_shared<CShape>(5.0f, 3, sf::Color::Blue, sf::Color::White, 1.0f);
     bullet->collision = std::make_shared<CCollision>(5.0f);
     bullet->shape->circle.setOrigin({bullet->shape->circle.getRadius(), bullet->shape->circle.getRadius()});
-    bullet->transform = std::make_shared<CTransform>(playerPosition, sf::Vector2f(directionNormalized.x * 5, directionNormalized.y * 5));
+    bullet->transform = std::make_shared<CTransform>(playerPosition, sf::Vector2f(directionNormalized.x * 400.f, directionNormalized.y * 400.f));
 }
 
 void Game::sCollision()
@@ -220,7 +221,7 @@ void Game::sCollision()
                     angle += (360 / enemy->shape->circle.getPointCount());
                     auto enemyPiece = m_entityManager->addEntity("enemy");
                     sf::Vector2f velocity(std::cos(angle), std::sin(angle));
-                    enemyPiece->transform = std::make_shared<CTransform>(enemy->transform->position, velocity);
+                    enemyPiece->transform = std::make_shared<CTransform>(enemy->transform->position, velocity * 256.f);
                     enemyPiece->shape = std::make_shared<CShape>(3, enemy->shape->circle.getPointCount(), sf::Color::Blue, sf::Color::White, 1.0f);
                 }
             }
